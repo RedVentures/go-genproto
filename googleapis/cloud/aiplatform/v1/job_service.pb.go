@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2022 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -1633,7 +1633,7 @@ type SearchModelDeploymentMonitoringStatsAnomaliesRequest struct {
 
 	// Required. ModelDeploymentMonitoring Job resource name.
 	// Format:
-	// `projects/{project}/locations/{location}/modelDeploymentMonitoringJobs/{model_deployment_monitoring_job}
+	// `projects/{project}/locations/{location}/modelDeploymentMonitoringJobs/{model_deployment_monitoring_job}`
 	ModelDeploymentMonitoringJob string `protobuf:"bytes,1,opt,name=model_deployment_monitoring_job,json=modelDeploymentMonitoringJob,proto3" json:"model_deployment_monitoring_job,omitempty"`
 	// Required. The DeployedModel ID of the
 	// [ModelDeploymentMonitoringObjectiveConfig.deployed_model_id].
