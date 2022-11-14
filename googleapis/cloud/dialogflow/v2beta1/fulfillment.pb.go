@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2022 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -107,6 +107,7 @@ type Fulfillment struct {
 
 	// Required. The unique identifier of the fulfillment.
 	// Supported formats:
+	//
 	// - `projects/<Project ID>/agent/fulfillment`
 	// - `projects/<Project ID>/locations/<Location ID>/agent/fulfillment`
 	//
@@ -220,6 +221,7 @@ type GetFulfillmentRequest struct {
 
 	// Required. The name of the fulfillment.
 	// Supported formats:
+	//
 	// - `projects/<Project ID>/agent/fulfillment`
 	// - `projects/<Project ID>/locations/<Location ID>/agent/fulfillment`
 	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
@@ -325,8 +327,10 @@ func (x *UpdateFulfillmentRequest) GetUpdateMask() *fieldmaskpb.FieldMask {
 
 // Represents configuration for a generic web service.
 // Dialogflow supports two mechanisms for authentications:
+//
 // - Basic authentication with username and password.
 // - Authentication with additional authentication headers.
+//
 // More information could be found at:
 // https://cloud.google.com/dialogflow/docs/fulfillment-configure.
 type Fulfillment_GenericWebService struct {

@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2022 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -745,19 +745,24 @@ func (x *ImportEntitiesMetadata) GetInputUrl() string {
 // Example usage:
 //
 // Entire project:
-//   kinds=[], namespace_ids=[]
+//
+//	kinds=[], namespace_ids=[]
 //
 // Kinds Foo and Bar in all namespaces:
-//   kinds=['Foo', 'Bar'], namespace_ids=[]
+//
+//	kinds=['Foo', 'Bar'], namespace_ids=[]
 //
 // Kinds Foo and Bar only in the default namespace:
-//   kinds=['Foo', 'Bar'], namespace_ids=['']
+//
+//	kinds=['Foo', 'Bar'], namespace_ids=['']
 //
 // Kinds Foo and Bar in both the default and Baz namespaces:
-//   kinds=['Foo', 'Bar'], namespace_ids=['', 'Baz']
+//
+//	kinds=['Foo', 'Bar'], namespace_ids=['', 'Baz']
 //
 // The entire Baz namespace:
-//   kinds=[], namespace_ids=['Baz']
+//
+//	kinds=[], namespace_ids=['Baz']
 type EntityFilter struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -1208,7 +1213,7 @@ func (x *IndexOperationMetadata) GetIndexId() string {
 // design pattern.
 //
 // This singleton resource can be accessed at:
-// `projects/{project_id}/datastore-firestore-migration`
+// "projects/{project_id}/operations/datastore-firestore-migration"
 type DatastoreFirestoreMigrationMetadata struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
