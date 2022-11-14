@@ -1,0 +1,80 @@
+name: GADS Generate GO
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "target commit (commit hash, branch name, tag)"
+        required: false
+        default: ""
+        type: string
+
+env:
+  # used by gh cli
+  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+jobs:
+  gads-generate-go:
+    name: "GADS Generate GO"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Setup Directories
+        run: |
+          mkdir -p /tmp/src/cloud.google.com/go
+          mkdir -p /tmp/src/googleapis
+
+      - name: Setup genbot and remove bypass
+        working-directory: "/tmp/src/cloud.google.com/go"
+        run: |
+          git clone https://github.com/googleapis/google-cloud-go.git .
+          # rename google's gads bypass to bypass the bypass
+          # https://github.com/googleapis/google-cloud-go/blob/feb6b0a8b771875a55c75fa959e19f6f12079030/internal/gapicgen/generator/genproto.go#L80
+          grep -rl 'google.golang.org/genproto/googleapis/ads' ./internal/gapicgen/generator | xargs sed --in-place=backup 's,google.golang.org/genproto/googleapis/ads,google.golang.org/genproto/googleapis/ads_disabled,g'
+
+        # Only needed because we need to fix it; else we could let genbot pull it automatically.
+      - name: Setup googleapis and fix ARM filenames
+        working-directory: "/tmp/src/googleapis"
+        run: |
+          git clone https://github.com/googleapis/googleapis.git .
+          # fixing golang _arm.proto filename conflicts https://groups.google.com/g/adwords-api/c/Tti9vvDPdK4/m/6a86kM18AAAJ
+          cd google
+          find . -name '*_arm.proto' -exec sh -c 'mv "$0" "${0%_arm.proto}_arm0.proto" && grep -rl "$(basename $0)" . | xargs sed --in-place=backup "s,_arm.proto,_arm0.proto,g"' {} \;
+
+      - name: Checkout genproto
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ inputs.ref }}
+
+      - name: Generate GO
+        working-directory: "/tmp/src/cloud.google.com/go/internal/gapicgen"
+        run: |
+          # https://pkg.go.dev/cloud.google.com/go/internal/gapicgen/cmd/genbot
+          DOCKERFILE=cmd/genbot/Dockerfile
+          # Lookup WORKDIR in case google changes it again
+          WORKDIR=$(grep "WORKDIR" $DOCKERFILE | tail -n 1 | cut -d" " -f2)
+          # Bypass git directory security due to repo being cloned out here and mounted.
+          sed --in-place=backup "s,WORKDIR,RUN git config --global --add safe.directory $WORKDIR\nWORKDIR,g" $DOCKERFILE
+          docker build -t genbot -f $DOCKERFILE .
+          docker run --rm \
+            -v `pwd`/../..:$WORKDIR \
+            -v /tmp/src/googleapis:/googleapis \
+            -v $GITHUB_WORKSPACE:/genproto \
+            -e GENBOT_LOCAL_MODE=true \
+            -e GENBOT_FORCE_ALL=true \
+            -e GOCLOUD_DIR=$WORKDIR \
+            -e GOOGLEAPIS_DIR=/googleapis \
+            -e GENPROTO_DIR=/genproto \
+            -e GAPIC_TO_GENERATE=google.golang.org/google/ads/googleads \
+            genbot
+
+      - name: Create PR
+        run: |
+          git status
+          # git checkout -b TBD
+          # git add --all
+          # git commit -m "TBD"
+          # gh pr create --fill
