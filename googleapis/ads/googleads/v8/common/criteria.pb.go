@@ -2645,10 +2645,10 @@ func (x *LanguageInfo) GetLanguageConstant() string {
 }
 
 // An IpBlock criterion used for IP exclusions. We allow:
-//  - IPv4 and IPv6 addresses
-//  - individual addresses (192.168.0.1)
-//  - masks for individual addresses (192.168.0.1/32)
-//  - masks for Class C networks (192.168.0.1/24)
+//   - IPv4 and IPv6 addresses
+//   - individual addresses (192.168.0.1)
+//   - masks for individual addresses (192.168.0.1/32)
+//   - masks for Class C networks (192.168.0.1/24)
 type IpBlockInfo struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
