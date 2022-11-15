@@ -1,8 +1,6 @@
 name: GADS Generate GO
 
 on:
-  release:
-    types: [published]
   workflow_dispatch:
     inputs:
       ref:
@@ -11,16 +9,13 @@ on:
         default: ""
         type: string
 
-env:
-  # used by gh cli
-  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
 jobs:
   gads-generate-go:
     name: "GADS Generate GO"
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
+      pull-requests: write
     steps:
       - name: Setup Directories
         run: |
@@ -34,6 +29,9 @@ jobs:
           # rename google's gads bypass to bypass the bypass
           # https://github.com/googleapis/google-cloud-go/blob/feb6b0a8b771875a55c75fa959e19f6f12079030/internal/gapicgen/generator/genproto.go#L80
           grep -rl 'google.golang.org/genproto/googleapis/ads' ./internal/gapicgen/generator | xargs sed --in-place=backup 's,google.golang.org/genproto/googleapis/ads,google.golang.org/genproto/googleapis/ads_disabled,g'
+          # output the genproto version used
+          GENPROTO=$(grep "google.golang.org/genproto" go.mod | cut -d" " -f2)
+          echo "::notice title=google.golang.org/genproto::$GENPROTO"
 
         # Only needed because we need to fix it; else we could let genbot pull it automatically.
       - name: Setup googleapis and fix ARM filenames
@@ -57,7 +55,7 @@ jobs:
           # Lookup WORKDIR in case google changes it again
           WORKDIR=$(grep "WORKDIR" $DOCKERFILE | tail -n 1 | cut -d" " -f2)
           # Bypass git directory security due to repo being cloned out here and mounted.
-          sed --in-place=backup "s,WORKDIR,RUN git config --global --add safe.directory $WORKDIR\nWORKDIR,g" $DOCKERFILE
+          sed --in-place=backup "s,CMD,RUN git config --global --add safe.directory $WORKDIR\nCMD,g" $DOCKERFILE
           docker build -t genbot -f $DOCKERFILE .
           docker run --rm \
             -v `pwd`/../..:$WORKDIR \
@@ -73,8 +71,14 @@ jobs:
 
       - name: Create PR
         run: |
-          git status
-          # git checkout -b TBD
-          # git add --all
-          # git commit -m "TBD"
-          # gh pr create --fill
+          git config --global user.email "${{ github.actor }}@users.noreply.github.com"
+          git config --global user.name "${{ github.actor }}"
+          git config --global push.autoSetupRemote true
+          REF=$(git rev-parse --short HEAD)
+          git checkout -b "gads-update-$REF"
+          git add googleapis/ads/googleads
+          git commit -m "chore(gads): auto-regenerate ($REF) by ${{ github.actor }}"
+          git push
+          gh pr create --title 'chore(gads): auto-regenerate ($REF) by ${{ github.actor }}' --body "Created by ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
