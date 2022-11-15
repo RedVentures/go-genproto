@@ -21,14 +21,15 @@
 package resources
 
 import (
+	reflect "reflect"
+	sync "sync"
+
 	common "google.golang.org/genproto/googleapis/ads/googleads/v9/common"
 	enums "google.golang.org/genproto/googleapis/ads/googleads/v9/enums"
 	errors "google.golang.org/genproto/googleapis/ads/googleads/v9/errors"
 	_ "google.golang.org/genproto/googleapis/api/annotations"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
-	reflect "reflect"
-	sync "sync"
 )
 
 const (
